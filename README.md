@@ -13,8 +13,8 @@ Ensure you have Rust installed. If not, install it from [Rust's official website
 Clone the repository and build the project:
 
 ```sh
-git clone <repository-url>
-cd <repository-folder>
+git clone git@github.com:pawsengineer/sui-keytool-grinder.git
+cd sui-keytool-grinder
 cargo build --release
 ```
 
