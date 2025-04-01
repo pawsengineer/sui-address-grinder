@@ -13,7 +13,7 @@ impl Keytool {
 
     pub fn grind(&self, args: Grind) -> Result<(SuiAddress, String)> {
         let mut i = 0;
-        let key_scheme = sui_types::crypto::SignatureScheme::ED25519; // TODO: support other schemes
+        let key_scheme = args.scheme;
         loop {
             let (addr, s) = self.generate(key_scheme)?;
             if args.is_valid(&addr.to_string()) {

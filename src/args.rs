@@ -1,19 +1,39 @@
 use clap::Parser;
+use sui_types::crypto::SignatureScheme;
+
+use crate::helper::signature_scheme::SignatureSchemeArg;
 
 #[derive(Parser)]
-#[command(version, about, long_about = None)]
+#[command(name = "Sui Keytool Grinder")]
+#[command(version = "1.0")]
+#[command(about, long_about = None)]
 pub struct Grind {
     /// Specific a pubkey to start with
-    #[arg(short, long)]
+    #[arg(long)]
     starts_with: Option<String>,
 
     /// Specific a pubkey to ends with
-    #[arg(short, long)]
+    #[arg(long)]
     ends_with: Option<String>,
 
     /// Ignore case-sensitivity
-    #[arg(short, long)]
+    #[arg(long)]
     ignore_case: bool,
+
+    /// Specific a signature scheme
+    #[arg(long, default_value = "ed25519", value_parser = Grind::try_from_arg)]
+    pub scheme: SignatureScheme,
+}
+
+impl Default for Grind {
+    fn default() -> Self {
+        Grind {
+            starts_with: None,
+            ends_with: None,
+            ignore_case: false,
+            scheme: SignatureScheme::ED25519,
+        }
+    }
 }
 
 impl Grind {
@@ -51,6 +71,17 @@ impl Grind {
     }
 }
 
+impl SignatureSchemeArg for Grind {
+    fn try_from_arg(s: &str) -> Result<SignatureScheme, anyhow::Error> {
+        match s {
+            "ed25519" => Ok(SignatureScheme::ED25519),
+            "secp256k1" => Ok(SignatureScheme::Secp256k1),
+            "secp256r1" => Ok(SignatureScheme::Secp256r1),
+            _ => Err(anyhow::anyhow!("Unknown signature scheme: {}", s)),
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -61,6 +92,7 @@ mod tests {
             starts_with: Some("123".to_string()),
             ends_with: None,
             ignore_case: false,
+            ..Default::default()
         };
         assert!(!args.is_valid("0x0123abc"));
         assert!(args.is_valid("0x123abc"));
@@ -72,6 +104,7 @@ mod tests {
             starts_with: None,
             ends_with: Some("abc".to_string()),
             ignore_case: false,
+            ..Default::default()
         };
         assert!(!args.is_valid("0x123abc0"));
         assert!(args.is_valid("0x123abc"));
@@ -83,6 +116,7 @@ mod tests {
             starts_with: Some("123".to_string()),
             ends_with: Some("abc".to_string()),
             ignore_case: false,
+            ..Default::default()
         };
         assert!(!args.is_valid("0xabc123"));
         assert!(args.is_valid("0x123abc"));
@@ -94,8 +128,26 @@ mod tests {
             starts_with: Some("123".to_string()),
             ends_with: Some("abc".to_string()),
             ignore_case: true,
+            ..Default::default()
         };
         assert!(args.is_valid("0x123ABC"));
         assert!(args.is_valid("0x123abc"));
+    }
+
+    #[test]
+    fn test_scheme_from_arg() {
+        assert_eq!(
+            Grind::try_from_arg("ed25519").unwrap(),
+            sui_types::crypto::SignatureScheme::ED25519
+        );
+        assert_eq!(
+            Grind::try_from_arg("secp256k1").unwrap(),
+            sui_types::crypto::SignatureScheme::Secp256k1
+        );
+        assert_eq!(
+            Grind::try_from_arg("secp256r1").unwrap(),
+            sui_types::crypto::SignatureScheme::Secp256r1
+        );
+        assert!(Grind::try_from_arg("unknown").is_err());
     }
 }
