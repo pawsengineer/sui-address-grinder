@@ -20,7 +20,7 @@ pub struct Grind {
     #[arg(long)]
     ignore_case: bool,
 
-    /// Specific a signature scheme
+    /// Specific a signature scheme (secp256k1, secp256r1, ed25519)
     #[arg(long, default_value = "ed25519", value_parser = Grind::try_from_arg)]
     pub scheme: SignatureScheme,
 }
