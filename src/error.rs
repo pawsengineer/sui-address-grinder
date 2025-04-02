@@ -11,9 +11,3 @@ pub enum GrindArgError {
     #[error("Invalid signature scheme: {0}")]
     InvalidSignatureScheme(String),
 }
-
-#[derive(Debug, Error, PartialEq)]
-pub enum KeytoolError {
-    #[error("Failed to fetch core count")]
-    FailedToFetchCoreCount,
-}

@@ -5,7 +5,7 @@ use sui_types::crypto::SignatureScheme;
 use crate::{error::GrindArgError, helper::signature_scheme::SignatureSchemeArg};
 
 #[derive(Parser, Clone, Debug)]
-#[command(name = "Sui Keytool Grinder")]
+#[command(name = "Sui Address Grinder")]
 #[command(version = "1.0")]
 #[command(about, long_about = None)]
 pub struct GrindArgs {

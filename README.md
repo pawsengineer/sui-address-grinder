@@ -15,26 +15,29 @@ Clone the repository and build the project:
 ```sh
 git clone git@github.com:pawsengineer/sui-address-grinder.git
 cd sui-address-grinder
-cargo build --release
+```
+
+## Build and install
+
+To build and install `sui-address-grinder`, run:
+
+```sh
+./install.sh
+```
+
+Verify Installation
+After installation, verify that it is installed correctly by running:
+
+```sh
+sui-address-grinder --version
 ```
 
 ## Usage
 
-Run the CLI tool with the required arguments:
+Run the CLI tool with the arguments:
 
 ```sh
-cargo run --release
-```
-
-Need help?
-```sh
-cargo run --release -- --help
-```
-
-Example usage:
-
-```sh
-cargo run --release -- --starts-with ca7 --ends-with fff --ignore-case
+sui-address-grinder --starts-with ca7 --ends-with fff --cores 10 --ignore-case
 ```
 
 It's important to note that the `--starts-with` option disregards the 0x prefix. Therefore, to match addresses that begin with `0xca7`, you should provide `ca7` as the argument.
@@ -49,12 +52,6 @@ Address:        <generated-address>
 Seedphrase:     <generated-seedphrase>
 ====================================================
 ```
-
-## Dependencies
-
-- `clap` for parsing command-line arguments
-- `sui_keys` for Sui key generation
-- `sui_types` for Sui signature scheme
 
 ## License
 
