@@ -1,4 +1,4 @@
-# Sui Keytool Grinder
+# Sui Address Grinder
 
 A Rust CLI tool for grinding Sui blockchain addresses and seed phrases.
 
@@ -13,8 +13,8 @@ Ensure you have Rust installed. If not, install it from [Rust's official website
 Clone the repository and build the project:
 
 ```sh
-git clone git@github.com:pawsengineer/sui-keytool-grinder.git
-cd sui-keytool-grinder
+git clone git@github.com:pawsengineer/sui-address-grinder.git
+cd sui-address-grinder
 cargo build --release
 ```
 
@@ -24,6 +24,11 @@ Run the CLI tool with the required arguments:
 
 ```sh
 cargo run --release
+```
+
+Need help?
+```sh
+cargo run --release -- --help
 ```
 
 Example usage:
