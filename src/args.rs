@@ -71,11 +71,8 @@ impl Grind {
     }
 
     /// Checks if the address is valid based on the specified criteria
-    pub fn is_valid(&self, addr: &str) -> bool {
-        let mut addr = addr.to_string();
-        if addr.starts_with("0x") {
-            addr = addr[2..].to_string();
-        }
+    pub fn is_valid(&self, addr: &String) -> bool {
+        let mut addr = addr.strip_prefix("0x").unwrap_or(&addr).to_string();
 
         let mut starts_with = self.starts_with.clone().unwrap_or("".to_string());
         let mut ends_with = self.ends_with.clone().unwrap_or("".to_string());
@@ -122,8 +119,8 @@ mod tests {
             ignore_case: false,
             ..Default::default()
         };
-        assert!(!args.is_valid("0x0123abc"));
-        assert!(args.is_valid("0x123abc"));
+        assert!(!args.is_valid(&"0x0123abc".to_string()));
+        assert!(args.is_valid(&"0x123abc".to_string()));
     }
 
     #[test]
@@ -134,8 +131,8 @@ mod tests {
             ignore_case: false,
             ..Default::default()
         };
-        assert!(!args.is_valid("0x123abc0"));
-        assert!(args.is_valid("0x123abc"));
+        assert!(!args.is_valid(&"0x123abc0".to_string()));
+        assert!(args.is_valid(&"0x123abc".to_string()));
     }
 
     #[test]
@@ -146,8 +143,8 @@ mod tests {
             ignore_case: false,
             ..Default::default()
         };
-        assert!(!args.is_valid("0xabc123"));
-        assert!(args.is_valid("0x123abc"));
+        assert!(!args.is_valid(&"0xabc123".to_string()));
+        assert!(args.is_valid(&"0x123abc".to_string()));
     }
 
     #[test]
@@ -158,8 +155,8 @@ mod tests {
             ignore_case: true,
             ..Default::default()
         };
-        assert!(args.is_valid("0x123ABC"));
-        assert!(args.is_valid("0x123abc"));
+        assert!(args.is_valid(&"0x123ABC".to_string()));
+        assert!(args.is_valid(&"0x123abc".to_string()));
     }
 
     #[test]
