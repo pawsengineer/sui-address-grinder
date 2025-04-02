@@ -29,10 +29,10 @@ cargo run --release
 Example usage:
 
 ```sh
-cargo run --release -- --starts-with cat --ends-with paws --ignore-case
+cargo run --release -- --starts-with ca7 --ends-with fff --ignore-case
 ```
 
-It's important to note that the `--starts-with` option disregards the 0x prefix. Therefore, to match addresses that begin with 0xpaws, you should provide paws as the argument.
+It's important to note that the `--starts-with` option disregards the 0x prefix. Therefore, to match addresses that begin with `0xca7`, you should provide `ca7` as the argument.
 
 ### Output Format
 
