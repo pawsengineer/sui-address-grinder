@@ -4,22 +4,27 @@ use sui_types::crypto::SignatureScheme;
 
 use crate::{error::GrindArgError, helper::signature_scheme::SignatureSchemeArg};
 
-#[derive(Parser)]
+#[derive(Parser, Clone, Debug)]
 #[command(name = "Sui Keytool Grinder")]
 #[command(version = "1.0")]
 #[command(about, long_about = None)]
 pub struct Grind {
     /// Specific a pubkey to start with
     #[arg(long)]
-    starts_with: Option<String>,
+    pub starts_with: Option<String>,
 
     /// Specific a pubkey to ends with
     #[arg(long)]
-    ends_with: Option<String>,
+    pub ends_with: Option<String>,
 
     /// Ignore case-sensitivity
     #[arg(long)]
-    ignore_case: bool,
+    pub ignore_case: bool,
+
+    /// Number of cores to use
+    /// If not specified, it will use all available cores
+    #[arg(long)]
+    pub cores: Option<usize>,
 
     /// Specific a signature scheme (secp256k1, secp256r1, ed25519)
     #[arg(long, default_value = "ed25519", value_parser = Grind::try_from_arg)]
@@ -32,6 +37,7 @@ impl Default for Grind {
             starts_with: None,
             ends_with: None,
             ignore_case: false,
+            cores: None,
             scheme: SignatureScheme::ED25519,
         }
     }

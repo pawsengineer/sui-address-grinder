@@ -8,6 +8,7 @@ pub fn main() {
     let keytool = Keytool::new();
     let (addr, sp) = keytool.grind(args).unwrap();
 
+    println!();
     println!("====================================================");
     println!("Address:\t{}", addr);
     println!("Seedphase:\t{}", sp);
