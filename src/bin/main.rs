@@ -1,5 +1,5 @@
 use clap::Parser;
-use sui_keytool_grinding::{args::GrindArgs, grinder::Grinder};
+use sui_address_grinder::{args::GrindArgs, grinder::Grinder};
 
 pub fn main() {
     let args = GrindArgs::parse();

@@ -4807,6 +4807,19 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "734676eb262c623cec13c3155096e08d1f8f29adce39ba17948b18dad1e54142"
 
 [[package]]
+name = "sui-address-grinder"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "clap",
+ "core_affinity",
+ "spinners",
+ "sui-keys",
+ "sui-types",
+ "thiserror 2.0.12",
+]
+
+[[package]]
 name = "sui-enum-compat-util"
 version = "0.1.0"
 source = "git+https://github.com/MystenLabs/sui#c60ea0034e18aee4cf3eb19f36fd54af1d253440"
@@ -4851,19 +4864,6 @@ dependencies = [
  "slip10_ed25519",
  "sui-types",
  "tiny-bip39",
-]
-
-[[package]]
-name = "sui-keytool-grinding"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "clap",
- "core_affinity",
- "spinners",
- "sui-keys",
- "sui-types",
- "thiserror 2.0.12",
 ]
 
 [[package]]

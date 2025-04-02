@@ -1,5 +1,5 @@
 [package]
-name = "sui-keytool-grinding"
+name = "sui-address-grinder"
 version = "0.1.0"
 edition = "2024"
 
@@ -8,6 +8,6 @@ anyhow = "1.0.97"
 thiserror = "2.0.12"
 sui-keys = { git = "https://github.com/MystenLabs/sui" }
 sui-types = { git = "https://github.com/MystenLabs/sui" }
-clap = { version="4.5.34", features = ["derive"] }
+clap = { version = "4.5.34", features = ["derive"] }
 core_affinity = "0.8.3"
 spinners = "4.1.1"
