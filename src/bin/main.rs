@@ -1,12 +1,12 @@
 use clap::Parser;
-use sui_keytool_grinding::{args::Grind, grind::Keytool};
+use sui_keytool_grinding::{args::GrindArgs, grinder::Grinder};
 
 pub fn main() {
-    let args = Grind::parse();
+    let args = GrindArgs::parse();
     args.must_validate();
 
-    let keytool = Keytool::new();
-    let (addr, sp) = keytool.grind(args).unwrap();
+    let grinder = Grinder::new();
+    let (addr, sp) = grinder.grind(args).unwrap();
 
     println!();
     println!("====================================================");

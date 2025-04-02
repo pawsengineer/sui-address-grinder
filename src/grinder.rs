@@ -1,23 +1,29 @@
 use std::sync::{Arc, RwLock};
 
-use crate::{args::Grind, helper::cores::get_core_ids};
+use crate::{args::GrindArgs, helper::cores::get_core_ids};
 use anyhow::Result;
 
 use spinners::{Spinner, Spinners};
 use sui_keys::keystore::{AccountKeystore, InMemKeystore};
 use sui_types::base_types::SuiAddress;
 
-pub struct Keytool {}
+pub struct Grinder {}
 
-impl Keytool {
+impl Grinder {
     pub fn new() -> Self {
-        Keytool {}
+        Grinder {}
     }
 
-    pub fn grind(&self, args: Grind) -> Result<(SuiAddress, String)> {
+    /// Grind the keypair using the given arguments
+    /// Returns the address and seedphrase if a solution is found
+    /// If no solution is found, it returns an error
+    /// The grinding process will be done in parallel using the specified number of cores
+    /// If no cores are specified, it will use all available cores
+    pub fn grind(&self, args: GrindArgs) -> Result<(SuiAddress, String)> {
         let core_ids = get_core_ids(args.cores);
         let scheme = args.scheme;
 
+        // Create a global flag to indicate if a solution is found
         let catched = Arc::new(RwLock::new(false));
 
         let mut spinner = Spinner::new(
@@ -44,12 +50,12 @@ impl Keytool {
                         }
 
                         let (addr, s, _) = ret.unwrap();
-                        if args.is_valid(&addr.to_string()) {
+                        if args.is_matched(&addr.to_string()) {
                             *catched.write().unwrap() = true;
                             return Some((addr, s));
                         }
 
-                        // Check if we found a solution
+                        // Check if we found already found a solution (catched by another thread)
                         if catched.read().unwrap().clone() {
                             return None;
                         }
@@ -58,6 +64,9 @@ impl Keytool {
             })
             .collect();
 
+        // Wait for the threads to finish
+        // Any thread that finds a solution will return it
+        // The rest of the threads will return None
         for h in handles {
             if let Ok(Some(solution)) = h.join() {
                 return Ok(solution);

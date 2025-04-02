@@ -8,7 +8,7 @@ use crate::{error::GrindArgError, helper::signature_scheme::SignatureSchemeArg};
 #[command(name = "Sui Keytool Grinder")]
 #[command(version = "1.0")]
 #[command(about, long_about = None)]
-pub struct Grind {
+pub struct GrindArgs {
     /// Specific a pubkey to start with
     #[arg(long)]
     pub starts_with: Option<String>,
@@ -27,13 +27,13 @@ pub struct Grind {
     pub cores: Option<usize>,
 
     /// Specific a signature scheme (secp256k1, secp256r1, ed25519)
-    #[arg(long, default_value = "ed25519", value_parser = Grind::try_from_arg)]
+    #[arg(long, default_value = "ed25519", value_parser = GrindArgs::try_from_arg)]
     pub scheme: SignatureScheme,
 }
 
-impl Default for Grind {
+impl Default for GrindArgs {
     fn default() -> Self {
-        Grind {
+        GrindArgs {
             starts_with: None,
             ends_with: None,
             ignore_case: false,
@@ -43,7 +43,7 @@ impl Default for Grind {
     }
 }
 
-impl Grind {
+impl GrindArgs {
     /// Checks if the string is valid hexadecimal (with or without `0x` prefix)
     fn is_valid_hex(s: &str) -> bool {
         let s = s.strip_prefix("0x").unwrap_or(s); // Remove "0x" if present
@@ -77,11 +77,12 @@ impl Grind {
     }
 
     /// Checks if the address is valid based on the specified criteria
-    pub fn is_valid(&self, addr: &String) -> bool {
+    pub fn is_matched(&self, addr: &String) -> bool {
         let mut addr = addr.strip_prefix("0x").unwrap_or(&addr).to_string();
 
         let mut starts_with = self.starts_with.clone().unwrap_or("".to_string());
         let mut ends_with = self.ends_with.clone().unwrap_or("".to_string());
+
         if self.ignore_case {
             addr = addr.to_lowercase();
             starts_with = starts_with.to_lowercase();
@@ -100,7 +101,7 @@ impl Grind {
     }
 }
 
-impl SignatureSchemeArg for Grind {
+impl SignatureSchemeArg for GrindArgs {
     fn try_from_arg(s: &str) -> Result<SignatureScheme> {
         match s {
             "ed25519" => Ok(SignatureScheme::ED25519),
@@ -119,68 +120,68 @@ mod tests {
 
     #[test]
     fn test_starts_with() {
-        let args = Grind {
+        let args = GrindArgs {
             starts_with: Some("123".to_string()),
             ends_with: None,
             ignore_case: false,
             ..Default::default()
         };
-        assert!(!args.is_valid(&"0x0123abc".to_string()));
-        assert!(args.is_valid(&"0x123abc".to_string()));
+        assert!(!args.is_matched(&"0x0123abc".to_string()));
+        assert!(args.is_matched(&"0x123abc".to_string()));
     }
 
     #[test]
     fn test_ends_with() {
-        let args = Grind {
+        let args = GrindArgs {
             starts_with: None,
             ends_with: Some("abc".to_string()),
             ignore_case: false,
             ..Default::default()
         };
-        assert!(!args.is_valid(&"0x123abc0".to_string()));
-        assert!(args.is_valid(&"0x123abc".to_string()));
+        assert!(!args.is_matched(&"0x123abc0".to_string()));
+        assert!(args.is_matched(&"0x123abc".to_string()));
     }
 
     #[test]
     fn test_starts_ends_with() {
-        let args = Grind {
+        let args = GrindArgs {
             starts_with: Some("123".to_string()),
             ends_with: Some("abc".to_string()),
             ignore_case: false,
             ..Default::default()
         };
-        assert!(!args.is_valid(&"0xabc123".to_string()));
-        assert!(args.is_valid(&"0x123abc".to_string()));
+        assert!(!args.is_matched(&"0xabc123".to_string()));
+        assert!(args.is_matched(&"0x123abc".to_string()));
     }
 
     #[test]
     fn test_ignore_case() {
-        let args = Grind {
+        let args = GrindArgs {
             starts_with: Some("123".to_string()),
             ends_with: Some("abc".to_string()),
             ignore_case: true,
             ..Default::default()
         };
-        assert!(args.is_valid(&"0x123ABC".to_string()));
-        assert!(args.is_valid(&"0x123abc".to_string()));
+        assert!(args.is_matched(&"0x123ABC".to_string()));
+        assert!(args.is_matched(&"0x123abc".to_string()));
     }
 
     #[test]
     fn test_scheme_from_arg() {
         assert_eq!(
-            Grind::try_from_arg("ed25519").unwrap(),
+            GrindArgs::try_from_arg("ed25519").unwrap(),
             sui_types::crypto::SignatureScheme::ED25519
         );
         assert_eq!(
-            Grind::try_from_arg("secp256k1").unwrap(),
+            GrindArgs::try_from_arg("secp256k1").unwrap(),
             sui_types::crypto::SignatureScheme::Secp256k1
         );
         assert_eq!(
-            Grind::try_from_arg("secp256r1").unwrap(),
+            GrindArgs::try_from_arg("secp256r1").unwrap(),
             sui_types::crypto::SignatureScheme::Secp256r1
         );
         assert_eq!(
-            Grind::try_from_arg("unknown")
+            GrindArgs::try_from_arg("unknown")
                 .unwrap_err()
                 .downcast_ref::<GrindArgError>(),
             Some(&GrindArgError::InvalidSignatureScheme(
@@ -191,16 +192,16 @@ mod tests {
 
     #[test]
     fn test_is_valid_hex() {
-        assert!(Grind::is_valid_hex("0x123abc"));
-        assert!(Grind::is_valid_hex("123abc"));
-        assert!(!Grind::is_valid_hex("0x123xyz"));
-        assert!(!Grind::is_valid_hex("123xyz"));
-        assert!(!Grind::is_valid_hex(""));
+        assert!(GrindArgs::is_valid_hex("0x123abc"));
+        assert!(GrindArgs::is_valid_hex("123abc"));
+        assert!(!GrindArgs::is_valid_hex("0x123xyz"));
+        assert!(!GrindArgs::is_valid_hex("123xyz"));
+        assert!(!GrindArgs::is_valid_hex(""));
     }
 
     #[test]
     fn test_validate() {
-        let args = Grind {
+        let args = GrindArgs {
             starts_with: Some("123".to_string()),
             ends_with: Some("abc".to_string()),
             ignore_case: false,
@@ -208,7 +209,7 @@ mod tests {
         };
         assert!(args.validate().is_ok());
 
-        let args_invalid = Grind {
+        let args_invalid = GrindArgs {
             starts_with: Some("xyz".to_string()),
             ends_with: Some("123".to_string()),
             ignore_case: false,
@@ -222,7 +223,7 @@ mod tests {
             Some(&GrindArgError::InvalidHexStringStartsWith)
         );
 
-        let args_invalid = Grind {
+        let args_invalid = GrindArgs {
             starts_with: Some("123".to_string()),
             ends_with: Some("xyz".to_string()),
             ignore_case: false,
