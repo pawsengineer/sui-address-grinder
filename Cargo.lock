@@ -4817,6 +4817,7 @@ dependencies = [
  "sui-keys",
  "sui-types",
  "thiserror 2.0.12",
+ "tokio",
 ]
 
 [[package]]
