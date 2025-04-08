@@ -21,6 +21,10 @@ pub struct GrindArgs {
     #[arg(long)]
     pub ignore_case: bool,
 
+    /// Verbose mode
+    #[arg(long)]
+    pub verbose: bool,
+
     /// Number of cores to use
     /// If not specified, it will use all available cores
     #[arg(long)]
@@ -37,6 +41,7 @@ impl Default for GrindArgs {
             starts_with: None,
             ends_with: None,
             ignore_case: false,
+            verbose: false,
             cores: None,
             scheme: SignatureScheme::ED25519,
         }
@@ -77,7 +82,7 @@ impl GrindArgs {
     }
 
     /// Checks if the address is valid based on the specified criteria
-    pub fn is_matched(&self, addr: &String) -> bool {
+    pub fn is_matched(&self, addr: &String, key: &String) -> bool {
         let mut addr = addr.strip_prefix("0x").unwrap_or(&addr).to_string();
 
         let mut starts_with = self.starts_with.clone().unwrap_or("".to_string());
@@ -87,6 +92,14 @@ impl GrindArgs {
             addr = addr.to_lowercase();
             starts_with = starts_with.to_lowercase();
             ends_with = ends_with.to_lowercase();
+        }
+
+        if self.verbose {
+            println!("====================================================");
+            println!("addr: {}", addr);
+            println!("seedphase: {}", key);
+            println!("====================================================");
+            println!();
         }
 
         if !addr.starts_with(&starts_with) {
@@ -126,8 +139,8 @@ mod tests {
             ignore_case: false,
             ..Default::default()
         };
-        assert!(!args.is_matched(&"0x0123abc".to_string()));
-        assert!(args.is_matched(&"0x123abc".to_string()));
+        assert!(!args.is_matched(&"0x0123abc".to_string(), &"0x0123abc".to_string()));
+        assert!(args.is_matched(&"0x123abc".to_string(), &"0x0123abc".to_string()));
     }
 
     #[test]
@@ -138,8 +151,8 @@ mod tests {
             ignore_case: false,
             ..Default::default()
         };
-        assert!(!args.is_matched(&"0x123abc0".to_string()));
-        assert!(args.is_matched(&"0x123abc".to_string()));
+        assert!(!args.is_matched(&"0x123abc0".to_string(), &"0x0123abc".to_string()));
+        assert!(args.is_matched(&"0x123abc".to_string(), &"0x0123abc".to_string()));
     }
 
     #[test]
@@ -150,8 +163,8 @@ mod tests {
             ignore_case: false,
             ..Default::default()
         };
-        assert!(!args.is_matched(&"0xabc123".to_string()));
-        assert!(args.is_matched(&"0x123abc".to_string()));
+        assert!(!args.is_matched(&"0xabc123".to_string(), &"0x0123abc".to_string()));
+        assert!(args.is_matched(&"0x123abc".to_string(), &"0x0123abc".to_string()));
     }
 
     #[test]
@@ -162,8 +175,8 @@ mod tests {
             ignore_case: true,
             ..Default::default()
         };
-        assert!(args.is_matched(&"0x123ABC".to_string()));
-        assert!(args.is_matched(&"0x123abc".to_string()));
+        assert!(args.is_matched(&"0x123ABC".to_string(), &"0x0123abc".to_string()));
+        assert!(args.is_matched(&"0x123abc".to_string(), &"0x0123abc".to_string()));
     }
 
     #[test]

@@ -50,7 +50,8 @@ impl Grinder {
                         }
 
                         let (addr, s, _) = ret.unwrap();
-                        if args.is_matched(&addr.to_string()) {
+                        println!("Generated address: {}", addr);
+                        if args.is_matched(&addr.to_string(), &s) {
                             *catched.write().unwrap() = true;
                             return Some((addr, s));
                         }
