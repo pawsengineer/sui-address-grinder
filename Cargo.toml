@@ -6,6 +6,7 @@ edition = "2024"
 [dependencies]
 anyhow = "1.0.97"
 thiserror = "2.0.12"
+tokio = { version = "1.34", features = ["rt", "rt-multi-thread", "macros"] }
 sui-keys = { git = "https://github.com/MystenLabs/sui" }
 sui-types = { git = "https://github.com/MystenLabs/sui" }
 clap = { version = "4.5.34", features = ["derive"] }
