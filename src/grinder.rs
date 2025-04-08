@@ -1,11 +1,12 @@
-use std::sync::{Arc, RwLock};
+use std::process::exit;
 
 use crate::{args::GrindArgs, helper::cores::get_core_ids};
-use anyhow::Result;
 
 use spinners::{Spinner, Spinners};
 use sui_keys::keystore::{AccountKeystore, InMemKeystore};
 use sui_types::base_types::SuiAddress;
+
+pub struct Solution(pub SuiAddress, pub String);
 
 pub struct Grinder {}
 
@@ -19,46 +20,56 @@ impl Grinder {
     /// If no solution is found, it returns an error
     /// The grinding process will be done in parallel using the specified number of cores
     /// If no cores are specified, it will use all available cores
-    pub fn grind(&self, args: GrindArgs) -> Result<(SuiAddress, String)> {
+    pub fn grind(&self, args: GrindArgs) {
         let core_ids = get_core_ids(args.cores);
         let scheme = args.scheme;
-
-        // Create a global flag to indicate if a solution is found
-        let catched = Arc::new(RwLock::new(false));
 
         let mut spinner = Spinner::new(
             Spinners::Dots8,
             format!("Grinding using {} cores...", core_ids.len()),
         );
 
+        let (sender, mut recv) = tokio::sync::mpsc::unbounded_channel::<Solution>();
+        tokio::spawn({
+            async move {
+                while let Some(solution) = recv.recv().await {
+                    spinner.stop();
+                    println!();
+                    println!("====================================================");
+                    println!("Address:\t{}", solution.0);
+                    println!("Seedphrase:\t{}", solution.1);
+                    println!("====================================================");
+                    exit(0);
+                }
+            }
+        });
+
         let handles: Vec<_> = core_ids
             .into_iter()
             .map(|i| {
                 let args = args.clone();
-                let catched = Arc::clone(&catched);
+                let sender = sender.clone();
 
                 std::thread::spawn(move || {
                     // Pin to core
                     let _ = core_affinity::set_for_current(i);
 
                     let mut key_store = InMemKeystore::default();
-
                     loop {
+                        // Check if the read mux is closed
+                        if sender.is_closed() {
+                            exit(0);
+                        }
+
+                        // Otherwise, generate a new key
                         let ret = key_store.generate_and_add_new_key(scheme, None, None, None);
                         if ret.is_err() {
                             continue;
                         }
 
-                        let (addr, s, _) = ret.unwrap();
-                        println!("Generated address: {}", addr);
-                        if args.is_matched(&addr.to_string(), &s) {
-                            *catched.write().unwrap() = true;
-                            return Some((addr, s));
-                        }
-
-                        // Check if we found already found a solution (catched by another thread)
-                        if catched.read().unwrap().clone() {
-                            return None;
+                        let (addr, sp, _) = ret.unwrap();
+                        if args.is_matched(&addr.to_string()) {
+                            let _ = sender.send(Solution(addr, sp));
                         }
                     }
                 })
@@ -69,13 +80,7 @@ impl Grinder {
         // Any thread that finds a solution will return it
         // The rest of the threads will return None
         for h in handles {
-            if let Ok(Some(solution)) = h.join() {
-                return Ok(solution);
-            }
+            if let Ok(()) = h.join() {}
         }
-
-        spinner.stop();
-
-        Err(anyhow::anyhow!("No solution found"))
     }
 }
