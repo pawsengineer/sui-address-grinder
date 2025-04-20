@@ -96,7 +96,7 @@ impl Grinder {
         let total_grinded_clone = total_grinded.clone();
         std::thread::spawn(move || {
             loop {
-                std::thread::sleep(Duration::from_secs(5));
+                std::thread::sleep(Duration::from_secs(2));
                 spinner.update(
                     spinners::Dots2,
                     format!(
