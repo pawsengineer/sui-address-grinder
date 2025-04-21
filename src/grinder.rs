@@ -81,7 +81,6 @@ impl Grinder {
                         }
 
                         let (addr, sp, _) = ret.unwrap();
-
                         if args.is_matched(&addr.to_string()) {
                             let _ = sender.send(Solution(addr, sp));
                         }
