@@ -2,6 +2,15 @@
 name = "sui-address-grinder"
 version = "0.1.0"
 edition = "2024"
+description = """
+A Rust CLI tool for grinding Sui blockchain addresses and seed phrases.
+"""
+authors = ["Pawsengineer <manovisut.ktp@gmail.com"]
+license = "MIT"
+keywords = ["sui", "cli", "address", "grinder", "seed phrase"]
+readme = "README.md"
+repository = "https://github.com/pawsengineer/sui-address-grinder.git"
+homepage = "https://github.com/pawsengineer/sui-address-grinder.git"
 
 [dependencies]
 anyhow = "1.0.97"
